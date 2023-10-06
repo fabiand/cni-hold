@@ -16,7 +16,7 @@ namespace - and thus the pod itself - until the pod annotation
 
 # Setup
 
-> **Important*
+> **Important**
 > minikube must be installed
 
 ```console
@@ -30,6 +30,10 @@ $
 ```
 
 # Test
+
+> **Important**
+> minikube must be installed
+> and `setup.sh` must have been run
 
 ```console
 $ bash test.sh
