@@ -18,7 +18,7 @@ namespace - and thus the pod itself - until the pod annotation
 
 minikube must be installed locally
 
-```
+```console
 $ bash setup.sh
 + minikube start --cni=bridge --container-runtime cri-o
 + minikube kubectl
@@ -30,7 +30,7 @@ $
 
 # Test
 
-```
+```console
 $ bash test.sh
 # Create bb (it's on-hold by default)
 $ kubectl create -f bb.yaml
