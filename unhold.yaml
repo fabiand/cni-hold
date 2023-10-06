@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: default
+  annotations:
+    hold_pod_creation: "false"
