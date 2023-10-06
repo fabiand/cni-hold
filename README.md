@@ -16,7 +16,8 @@ namespace - and thus the pod itself - until the pod annotation
 
 # Setup
 
-minikube must be installed locally
+> **Important*
+> minikube must be installed
 
 ```console
 $ bash setup.sh
