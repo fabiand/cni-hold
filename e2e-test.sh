@@ -5,7 +5,7 @@ c() { echo "# $@" ; }
 n() { echo "" ; }
 x() { echo "\$ $@" ; eval "$@" ; }
 die() { echo "FATAL: $@" ; exit 1 ; }
-assert() { echo "(assert) \$ $@" ; eval $@ || die "Assertion ret 0 failed: '$@'" ; echo "(assert) True" ; }
+assert() { echo "(assert) \$ $@" ; eval $@ || { echo "(assert) FALSE" ; die "Assertion ret 0 failed: '$@'" ; } ; echo "(assert) True" ; }
 
 c "Create bb (it's on-hold by default)"
 x "kubectl create -f bb.yaml"

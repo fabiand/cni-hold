@@ -36,9 +36,9 @@ $
 > and `setup.sh` must have been run
 
 ```console
-$ bash test.sh
+$ bash e2e-test.sh
 # Create bb (it's on-hold by default)
-$ kubectl create -f bb.yaml
+$ kubectl create -f bb-on-hold.yaml
 pod/busybox created
 (assert) $ kubectl get pods -o yaml busybox | grep hold_pod_creation | grep true
     hold_pod_creation: "true"
@@ -74,6 +74,5 @@ Error from server (NotFound): pods "busybox" not found
 (assert) True
 
 # The validation has passed! All is well.
+$
 ```
-
-
