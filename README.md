@@ -2,6 +2,10 @@ A protoype of a CNI plugin to hold the creation of a pod network
 namespace - and thus the pod itself - until the pod annotation
 `prevent_pod_creation` is set to `false`.
 
+(contrib/watch-and-annotate-pods.sh)[contrib/watch-and-annotate-pods.sh]
+is an example script to automatically set this annotation for every
+new pod.
+
 # Issues
 
 - CNI plugin MUST be the first in the chain
