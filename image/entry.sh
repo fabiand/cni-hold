@@ -29,7 +29,9 @@ echo "Installing kubeconfig from privileged pod"
 [[ -e "/run/secrets/kubernetes.io/serviceaccount/token" ]] && {
   mkdir -p $HOSTFS/etc/cni/net.d/hold.d/
   # FIXME will expire after a while
-  cp -v /run/secrets/kubernetes.io/serviceaccount/token $HOSTFS/etc/cni/net.d/hold.d/
+  DST=$HOSTFS/etc/cni/net.d/hold.d/token
+  touch $DST
+  mount -v -o bind /run/secrets/kubernetes.io/serviceaccount/token $DST
 }
 
 echo "Reconfiguring CNI (assumes OCP)"
