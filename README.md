@@ -13,31 +13,51 @@ new pod.
 
 # Files
 
-* `setup.sh` - Configure minikube with this custom CNI plugin
-- `test.sh` - Validate that the plugin is working as expected
-- `hold` - The CNI plugin itself
-- `unhold.yaml` - A yaml to /unhold/ a pod and permit it's creation
+- CNI Plugin
+  - `cni/hold` - The CNI plugin itself
+- Container Image for deployment
+  - `image/Containerfile` - UBI with script for deploying the CNI config
+  - `mage/entry.sh` - Script to deploy the CNI plugin and reconfigure CNI
+- Test
+  - `e2e-test.sh` - Validate that the plugin is working as expected
+  - `manifests/bb.yaml` - A yaml to deploy busybox with /hold/,
+    it needs to be unhold to be started
+  - `manifests/unhold.yaml` - A yaml to /unhold/ a pod and permit it's creation
+- Contrib
+  - `contrib/watch-and-annotate-pods.sh` - A script to watch for new
+    pods and annotate them to be hold
 
-# Setup
+# Deployment
+## With minikube
 
 > **Important**
 > minikube must be installed
 
-```console
-$ bash setup.sh
-+ minikube start --cni=bridge --container-runtime cri-o
-+ minikube kubectl
-+ minikube cp 1-k8s-w-hold.conflist /etc/cni/net.d/1-k8s.conflist
-+ minikube cp hold /opt/cni/bin/
-+ minikube ssh 'sudo chmod a+x /opt/cni/bin/hold'
-$
-```
+    $ setup.sh
+    + minikube start --cni=bridge --container-runtime cri-o
+    + minikube kubectl -- apply -f manifests/sa.yaml
+    + minikube kubectl -- apply -f manifests/ds.yaml
+    $
+
+## With OpenShift
+
+    $ setup.sh openshift
+    + oc project default
+    Already on project "default" on server "https://...".
+    + oc apply -f manifests/sa.yaml
+    serviceaccount/cni-hold-prototype unchanged
+    + oc adm policy add-cluster-role-to-user cluster-admin -z cni-hold-prototype
+    clusterrole.rbac.authorization.k8s.io/cluster-admin added: "cni-hold-prototype"
+    + oc adm policy add-scc-to-user privileged cni-hold-prototype
+    clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "cni-hold-prototype"
+    + oc apply -f manifests/ds.yaml
+    daemonset.apps/cni-hold-agent created
+    $
 
 # Test
 
 > **Important**
-> minikube must be installed
-> and `setup.sh` must have been run
+> Plugin must be deployed
 
 ```console
 $ bash e2e-test.sh

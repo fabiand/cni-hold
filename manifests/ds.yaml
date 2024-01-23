@@ -1,0 +1,54 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: cni-hold-agent
+  labels:
+    app: cni-hold
+    tier: node
+spec:
+  selector:
+    matchLabels:
+      name: cni-hold
+  template:
+    metadata:
+      annotations:
+        description: >-
+          Deploy the cni-hol plugin on nodes
+      labels:
+          name: cni-hold
+    spec:
+      restartPolicy: Always
+      serviceAccountName: cni-hold-prototype
+#      serviceAccount: cni-hold
+#      hostPID: true
+#      hostUsers: true
+      terminationGracePeriodSeconds: 5
+#      securityContext: {}
+      containers:
+        - name: cni-hold
+          image: >-
+            quay.io/fdeutsch/cni-hold-prototype:latest
+          imagePullPolicy: Always
+          env:
+          - name: "FSROOT"
+            value: "/host"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 50M
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - name: host
+            mountPath: "/host"
+      volumes:
+      - name: host
+        hostPath:
+          path: "/"
+      priorityClassName: system-node-critical
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 10%
+      maxSurge: 0
+status: {}

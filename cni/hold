@@ -22,6 +22,11 @@ MINIKUBE_KUBECONFIG="/etc/kubernetes/admin.conf"
     export KUBECONFIG=$MINIKUBE_KUBECONFIG
     export KUBECTL=$(ls -1 /var/lib/minikube/binaries/*/kubectl | head -n1)
 }
+CNI_TOKEN="/etc/cni/net.d/hold.d/token"
+[[ -f "$CNI_TOKEN" ]] && {
+    _log "CNI Hold token is used"
+    export KUBECONFIG="kubectl --token='$(<$CNI_TOKEN)'"
+}
 
 _log "Handling command '$CNI_COMMAND'"
 _log "for pod '$K8S_POD_NAMESPACE/$K8S_POD_NAME'"
