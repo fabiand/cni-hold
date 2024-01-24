@@ -33,11 +33,10 @@ new pod.
 > **Important**
 > minikube must be installed
 
-    $ setup.sh
-    + minikube start --cni=bridge --container-runtime cri-o
-    + minikube kubectl -- apply -f manifests/sa.yaml
-    + minikube kubectl -- apply -f manifests/ds.yaml
-    $
+    $ minikube start --cni=bridge --container-runtime cri-o
+    $ minikube kubectl -- apply -f manifests/sa.yaml
+    $ minikube kubectl -- apply -f manifests/nad.yaml
+    $ minikube kubectl -- apply -f manifests/ds.yaml
 
 ## With OpenShift
 

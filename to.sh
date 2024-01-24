@@ -23,7 +23,7 @@ deploy() {
 	qoc get project $NS || _oc adm new-project $NS
 	_oc project $NS
 	qoc get sa -n $NS $SA || {
-		_oc create sa -n $NS $SA
+		_oc apply -n $NS -f manifests/sa.yaml
 		#oc adm policy add-role-to-user -n $NS cluster-admin -z cni-hold
 		_oc adm policy add-cluster-role-to-user cluster-admin -z $SA
 		_oc adm policy add-scc-to-user -n $NS privileged -z $SA
