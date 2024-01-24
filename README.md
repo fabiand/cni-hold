@@ -40,22 +40,40 @@ new pod.
 
 ## With OpenShift
 
-    $ bash to.sh "destroy"
-    $ oc delete -f manifests/ds.yaml -f manifests/nad.yaml
-    daemonset.apps "cni-hold-agent" deleted
-    networkattachmentdefinition.k8s.cni.cncf.io "hold-prototype-cni" deleted
-    [fabiand@toolbox cni-hold-prototype (use-ds)]$ bash to.sh deploy
+    $ bash to.sh deploy
+    $ oc adm new-project cni-hold-prototype
+    Created project cni-hold-prototype
     $ oc project cni-hold-prototype
-    Already on project "cni-hold-prototype" on server "https://a1069488d579c4578b18ee70a862d20d-a8037ad35cafec56.elb.us-east-1.amazonaws.com:6443".
+    Already on project "cni-hold-prototype" on server "https://kube.example.com:6443".
+    $ oc create sa -n cni-hold-prototype cni-hold-prototype-sa
+    serviceaccount/cni-hold-prototype-sa created
+    $ oc adm policy add-cluster-role-to-user cluster-admin -z cni-hold-prototype-sa
+    clusterrole.rbac.authorization.k8s.io/cluster-admin added: "cni-hold-prototype-sa"
+    $ oc adm policy add-scc-to-user -n cni-hold-prototype privileged -z cni-hold-prototype-sa
+    clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "cni-hold-prototype-sa"
     $ oc apply -f manifests/ds.yaml -f manifests/nad.yaml
     daemonset.apps/cni-hold-agent created
     networkattachmentdefinition.k8s.cni.cncf.io/hold-prototype-cni created
     $
 
+# Usage
+
+Generally speaking the worklfow is as follows
+
+1. Create a NAD pointing to the hold CNI (see `manifests/nad.yaml`)
+2. Create a Pod using the hold CNI NAD (see `manifests/fedora.yaml`)
+3. Unhold the pod by patching it (see `manifests/unhold.yaml`)
+
+The following test flow is illustrating the usage
+
 # Test
 
 > **Important**
 > Plugin must be deployed
+
+> **Note**
+> In a disconnected environment ensure to make all used images
+> are mirrored.
 
 ```console
 $ bash e2e-test.sh
