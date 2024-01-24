@@ -18,10 +18,7 @@ spec:
           name: cni-hold
     spec:
       restartPolicy: Always
-      serviceAccountName: cni-hold-prototype
-#      serviceAccount: cni-hold
-#      hostPID: true
-#      hostUsers: true
+      serviceAccountName: cni-hold-prototype-sa
       terminationGracePeriodSeconds: 5
 #      securityContext: {}
       containers:

@@ -27,6 +27,17 @@ new pod.
   - `contrib/watch-and-annotate-pods.sh` - A script to watch for new
     pods and annotate them to be hold
 
+# Usage
+
+Generally speaking the worklfow is as follows
+
+1. Create a NAD pointing to the hold CNI (see `manifests/nad.yaml`)
+2. Create a Pod using the hold CNI NAD (see `manifests/fedora.yaml`)
+3. Unhold the pod by patching it (see `manifests/unhold.yaml`)
+
+The following deploy and test flows are illustrating the usage.
+
+
 # Deployment
 ## With minikube
 
@@ -55,16 +66,6 @@ new pod.
     daemonset.apps/cni-hold-agent created
     networkattachmentdefinition.k8s.cni.cncf.io/hold-prototype-cni created
     $
-
-# Usage
-
-Generally speaking the worklfow is as follows
-
-1. Create a NAD pointing to the hold CNI (see `manifests/nad.yaml`)
-2. Create a Pod using the hold CNI NAD (see `manifests/fedora.yaml`)
-3. Unhold the pod by patching it (see `manifests/unhold.yaml`)
-
-The following test flow is illustrating the usage
 
 # Test
 
