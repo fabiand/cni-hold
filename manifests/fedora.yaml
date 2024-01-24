@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: busybox
-  namespace: default
+  name: fedora
   annotations:
     hold_pod_creation: "true"
+    "k8s.v1.cni.cncf.io/networks": "hold-prototype-cni"
 spec:
-  terminationGracePeriodSeconds: 2
+  terminationGracePeriodSeconds: 0
   containers:
-  - image: busybox
+  - image: quay.io/fedora/fedora:latest
     command:
       - sleep
       - "3600"
     imagePullPolicy: IfNotPresent
-    name: busybox
+    name: fedora
   restartPolicy: Always

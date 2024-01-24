@@ -41,6 +41,7 @@ spec:
           volumeMounts:
           - name: host
             mountPath: "/host"
+            mountPropagation: "Bidirectional"
       volumes:
       - name: host
         hostPath:

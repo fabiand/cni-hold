@@ -20,7 +20,7 @@ new pod.
   - `mage/entry.sh` - Script to deploy the CNI plugin and reconfigure CNI
 - Test
   - `e2e-test.sh` - Validate that the plugin is working as expected
-  - `manifests/bb.yaml` - A yaml to deploy busybox with /hold/,
+  - `manifests/fedora.yaml` - A yaml to deploy fedora with /hold/,
     it needs to be unhold to be started
   - `manifests/unhold.yaml` - A yaml to /unhold/ a pod and permit it's creation
 - Contrib
@@ -41,17 +41,16 @@ new pod.
 
 ## With OpenShift
 
-    $ setup.sh openshift
-    + oc project default
-    Already on project "default" on server "https://...".
-    + oc apply -f manifests/sa.yaml
-    serviceaccount/cni-hold-prototype unchanged
-    + oc adm policy add-cluster-role-to-user cluster-admin -z cni-hold-prototype
-    clusterrole.rbac.authorization.k8s.io/cluster-admin added: "cni-hold-prototype"
-    + oc adm policy add-scc-to-user privileged cni-hold-prototype
-    clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "cni-hold-prototype"
-    + oc apply -f manifests/ds.yaml
+    $ bash to.sh "destroy"
+    $ oc delete -f manifests/ds.yaml -f manifests/nad.yaml
+    daemonset.apps "cni-hold-agent" deleted
+    networkattachmentdefinition.k8s.cni.cncf.io "hold-prototype-cni" deleted
+    [fabiand@toolbox cni-hold-prototype (use-ds)]$ bash to.sh deploy
+    $ oc project cni-hold-prototype
+    Already on project "cni-hold-prototype" on server "https://a1069488d579c4578b18ee70a862d20d-a8037ad35cafec56.elb.us-east-1.amazonaws.com:6443".
+    $ oc apply -f manifests/ds.yaml -f manifests/nad.yaml
     daemonset.apps/cni-hold-agent created
+    networkattachmentdefinition.k8s.cni.cncf.io/hold-prototype-cni created
     $
 
 # Test
@@ -61,42 +60,44 @@ new pod.
 
 ```console
 $ bash e2e-test.sh
-# Create bb (it's on-hold by default)
-$ kubectl create -f bb-on-hold.yaml
-pod/busybox created
-(assert) $ kubectl get pods -o yaml busybox | grep hold_pod_creation | grep true
+# Assumption: cni-hold has been deployed to the cluster
+# Create fedora (it's on-hold by default)
+$ kubectl create -f manifests/fedora.yaml
+pod/fedora created
+(assert:) $ kubectl get pods -o yaml fedora | grep hold_pod_creation | grep true
     hold_pod_creation: "true"
-(assert) True
+(assert?) True
 
 # Let it be scheduled, and check it is getting created
 $ sleep 10s
-(assert) $ kubectl get pods busybox | grep ContainerCreating
-busybox   0/1     ContainerCreating   0          11s
-(assert) True
+(assert:) $ kubectl get pods fedora | grep ContainerCreating
+fedora   0/1     ContainerCreating   0          10s
+(assert?) True
 
 # Wait to ensure it's blocked, and check that it is still not running
 $ sleep 30s
-(assert) $ kubectl get pods busybox | grep ContainerCreating
-busybox   0/1     ContainerCreating   0          41s
-(assert) True
+(assert:) $ kubectl get pods fedora | grep ContainerCreating
+fedora   0/1     ContainerCreating   0          41s
+(assert?) True
 
 # Unhold it
-$ kubectl patch pod busybox --patch-file unhold.yaml
-pod/busybox patched
+$ kubectl patch pod fedora --patch-file manifests/unhold.yaml
+pod/fedora patched
 
 # Give CNI some time to pick it up, and check that it's now running
 $ sleep 10s
-(assert) $ kubectl get pods busybox | grep Running
-busybox   1/1     Running   0          51s
-(assert) True
+(assert:) $ kubectl get pods fedora | grep Running
+fedora   1/1     Running   0          52s
+(assert?) True
 
 # Delete it
-$ kubectl delete -f bb.yaml
-pod "busybox" deleted
-(assert) $ kubectl get pods busybox 2>&1 | grep Error 
-Error from server (NotFound): pods "busybox" not found
-(assert) True
+$ kubectl delete -f manifests/fedora.yaml
+pod "fedora" deleted
+(assert:) $ kubectl get pods fedora 2>&1 | grep Error 
+Error from server (NotFound): pods "fedora" not found
+(assert?) True
 
 # The validation has passed! All is well.
+PASS
 $
 ```

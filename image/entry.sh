@@ -25,23 +25,31 @@ chmod a+x hold
 cp -v hold $CNIBINP
 
 
-echo "Installing kubeconfig from privileged pod"
+echo "Share privileged pod's serviceaccount with CNI plugin"
 [[ -e "/run/secrets/kubernetes.io/serviceaccount/token" ]] && {
-  mkdir -p $HOSTFS/etc/cni/net.d/hold.d/
-  # FIXME will expire after a while
-  DST=$HOSTFS/etc/cni/net.d/hold.d/token
-  touch $DST
-  mount -v -o bind /run/secrets/kubernetes.io/serviceaccount/token $DST
+  HOLD_D=$HOSTFS/etc/cni/net.d/hold.d/
+
+  mkdir -pv $HOLD_D
+
+  SADST=$HOLD_D/serviceaccount
+  mkdir -pv $SADST
+  mount -v -o rbind /run/secrets/kubernetes.io/serviceaccount $SADST
+
+  KCDST=$HOLD_D/kubeconfig
+  sed "/users:/,/client-key-data/d" $HOSTFS/etc/kubernetes/kubeconfig > $KCDST
 }
 
-echo "Reconfiguring CNI (assumes OCP)"
-test -e $CNICFG
-# Check if it's already installed
-grep hold $CNICFG || {
-  jq '.plugins = [{"type": "hold"}] + .plugins' < $CNICFG | tee new.conflist
-  mv -v new.conflist $CNICFG
-}
+## DO NOT CONFIGURE DEFAULT POD NETWORK AS WE USE NAD
+#echo "Reconfiguring CNI (assumes OCP)"
+#test -e $CNICFG
+## Check if it's already installed
+#grep hold $CNICFG || {
+#  jq '.plugins = [{"type": "hold"}] + .plugins' < $CNICFG | tee new.conflist
+#  mv -v new.conflist $CNICFG
+#}
 
 
 echo "Ready"
+:> $HOSTFS/tmp/hold.log
+tail -F $HOSTFS/tmp/hold.log
 sleep inf

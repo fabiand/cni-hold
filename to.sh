@@ -12,24 +12,29 @@ _oc() { echo "$ oc $@" ; oc $@ ; }
 qoc() { oc $@ > /dev/null 2>&1; }
 
 apply() {
-	_oc apply -f manifests/ds.yaml
+	_oc apply \
+		-f manifests/ds.yaml \
+		-f manifests/nad.yaml
 }
 
 deploy() {
-	local NS=cni-hold
-	qoc get project cni-hold || _oc adm new-project $NS
+	local NS=cni-hold-prototype
+	local SA=${NS}-sa
+	qoc get project $NS || _oc adm new-project $NS
 	_oc project $NS
-	qoc get sa -n $NS cni-hold || {
-		_oc create sa -n $NS cni-hold
+	qoc get sa -n $NS $SA || {
+		_oc create sa -n $NS $SA
 		#oc adm policy add-role-to-user -n $NS cluster-admin -z cni-hold
-		_oc adm policy add-cluster-role-to-user cluster-admin -z cni-hold
-		_oc adm policy add-scc-to-user -n $NS privileged -z cni-hold
+		_oc adm policy add-cluster-role-to-user cluster-admin -z $SA
+		_oc adm policy add-scc-to-user -n $NS privileged -z $SA
 	}
 	apply
 }
 
 destroy() {
-	_oc delete -f manifests/ds.yaml
+	_oc delete \
+		-f manifests/ds.yaml \
+		-f manifests/nad.yaml
 }
 
 eval "$@"
